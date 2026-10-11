@@ -1,5 +1,7 @@
 {
-  "buildCommand": "cd client && npm install && npm run build",
-  "outputDirectory": "client/dist",
-  "framework": "vite"
+  "version": 2,
+  "outputDirectory": "dist",
+  "routes": [
+    { "src": "/(.*)", "dest": "/dist/$1" }
+  ]
 }
