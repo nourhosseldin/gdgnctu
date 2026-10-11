@@ -271,7 +271,12 @@ app.get('/health', async (_req, res) => {
     await connectDB();
     res.json({ ok: true, db: mongoose.connection.readyState === 1 ? 'connected' : 'connecting' });
   } catch (e) {
-    res.status(503).json({ ok: false, reason: e.message === 'MONGO_URI_MISSING' ? 'no_db_uri' : 'db_error' });
+    // نرجع تفاصيل الخطأ لتسهيل التشخيص
+    res.status(503).json({
+      ok: false,
+      reason: e.message === 'MONGO_URI_MISSING' ? 'no_db_uri' : 'db_error',
+      detail: String(e.message || '').slice(0, 300),
+    });
   }
 });
 
