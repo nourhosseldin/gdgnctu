@@ -4,14 +4,11 @@ import {
   Award, AlertTriangle, FileText, Send, LogOut, CheckCircle, ChevronRight, Download, Plus, BarChart2
 } from 'lucide-react';
 
-const API_URL = 'http://localhost:5000/api';
-
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('gdg_token') || '');
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('gdg_user') || 'null'));
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  // Login/Register Form State
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,80 +17,84 @@ export default function App() {
   const [role, setRole] = useState('Student');
   const [authError, setAuthError] = useState('');
 
-  // Portal Data States
-  const [tracks, setTracks] = useState([]);
-  const [leaderboard, setLeaderboard] = useState([]);
-  const [events, setEvents] = useState([]);
-  const [submissions, setSubmissions] = useState([]);
-  const [recruitmentList, setRecruitmentList] = useState([]);
-  const [complaints, setComplaints] = useState([]);
-  const [seasons, setSeasons] = useState([]);
+  // Mock Data for Vercel Static Deployment
+  const [tracks, setTracks] = useState([
+    {
+      _id: '1',
+      name: 'Flutter Development',
+      type: 'Technical',
+      modules: [
+        {
+          title: 'Module 1: Dart Basics',
+          lessons: [
+            { _id: 'l1', title: 'Introduction to Dart', videoUrl: 'https://youtube.com' },
+            { _id: 'l2', title: 'Widgets & UI', videoUrl: 'https://youtube.com' }
+          ]
+        }
+      ]
+    },
+    {
+      _id: '2',
+      name: 'Web Development',
+      type: 'Technical',
+      modules: [
+        {
+          title: 'Module 1: React Basics',
+          lessons: [
+            { _id: 'l3', title: 'JSX and Components', videoUrl: 'https://youtube.com' }
+          ]
+        }
+      ]
+    }
+  ]);
 
-  // Form inputs for portal
+  const [leaderboard, setLeaderboard] = useState([
+    { name: 'أحمد محمد', track: 'Flutter', points: 150 },
+    { name: 'سارة خالد', track: 'Web', points: 130 },
+    { name: 'محمود علي', track: 'Cyber', points: 110 },
+    { name: 'نور هاني', track: 'UI/UX', points: 95 }
+  ]);
+
+  const [events, setEvents] = useState([
+    { _id: 'e1', title: 'GDG Info Session 2026', description: 'Kickoff meeting for the new season.', type: 'Upcoming', speaker: 'GDG Board' },
+    { _id: 'e2', title: 'Flutter Workshop', description: 'Build your first mobile app.', type: 'Workshop', speaker: 'Flutter Team' }
+  ]);
+
+  const [submissions, setSubmissions] = useState([
+    { _id: 's1', student: { name: 'محمد أحمد', email: 'mohamed@gdg.com', track: 'Flutter' }, linkOrFile: 'https://github.com/mohamed/task1', status: 'Pending' }
+  ]);
+
+  const [recruitmentList, setRecruitmentList] = useState([]);
+  const [complaints, setComplaints] = useState([
+    { message: 'اقتراح بتفعيل ورش عمل إضافية يوم الجمعة.', submittedAt: new Date() }
+  ]);
+
   const [newSubLink, setNewSubLink] = useState('');
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [selectedTrackId, setSelectedTrackId] = useState(null);
   
-  // Recruitment form
   const [recForm, setRecForm] = useState({ fullName: '', email: '', phone: '', trackPreference: 'Flutter', whyJoin: '' });
   const [anonymousMsg, setAnonymousMsg] = useState('');
 
-  useEffect(() => {
-    if (token) {
-      fetchData();
-    }
-  }, [token]);
-
-  const fetchData = async () => {
-    try {
-      const headers = { 'Authorization': `Bearer ${token}` };
-      const [tracksRes, lbRes, eventsRes, seasonsRes] = await Promise.all([
-        fetch(`${API_URL}/portal/tracks`),
-        fetch(`${API_URL}/portal/leaderboard`),
-        fetch(`${API_URL}/portal/events`),
-        fetch(`${API_URL}/portal/seasons`)
-      ]);
-
-      setTracks(await tracksRes.json());
-      setLeaderboard(await lbRes.json());
-      setEvents(await eventsRes.json());
-      setSeasons(await seasonsRes.json());
-
-      if (user && ['SuperAdmin', 'President', 'HR', 'TrackHead'].includes(user.role)) {
-        const subsRes = await fetch(`${API_URL}/portal/submissions`, { headers });
-        if (subsRes.ok) setSubmissions(await subsRes.json());
-
-        const recRes = await fetch(`${API_URL}/portal/recruitment`, { headers });
-        if (recRes.ok) setRecruitmentList(await recRes.json());
-
-        const compRes = await fetch(`${API_URL}/portal/complaints`, { headers });
-        if (compRes.ok) setComplaints(await compRes.json());
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleAuth = async (e) => {
+  const handleAuth = (e) => {
     e.preventDefault();
     setAuthError('');
-    const endpoint = isLogin ? '/auth/login' : '/auth/register';
-    try {
-      const res = await fetch(`${API_URL}${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name, track, role })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+    
+    // Simulate successful login/register
+    const mockUser = {
+      id: 'usr_' + Date.now(),
+      name: name || (email === 'admin@gdg.com' ? 'Super Admin' : 'طالب GDG'),
+      email: email,
+      role: email === 'admin@gdg.com' ? 'SuperAdmin' : role,
+      track: track,
+      points: 85,
+      strikes: 0
+    };
 
-      setToken(data.token);
-      setUser(data.user);
-      localStorage.setItem('gdg_token', data.token);
-      localStorage.setItem('gdg_user', JSON.stringify(data.user));
-    } catch (err) {
-      setAuthError(err.message);
-    }
+    setToken('mock_jwt_token_12345');
+    setUser(mockUser);
+    localStorage.setItem('gdg_token', 'mock_jwt_token_12345');
+    localStorage.setItem('gdg_user', JSON.stringify(mockUser));
   };
 
   const handleLogout = () => {
@@ -103,23 +104,11 @@ export default function App() {
     localStorage.removeItem('gdg_user');
   };
 
-  const submitTask = async (e) => {
+  const submitTask = (e) => {
     e.preventDefault();
-    if (!selectedTrackId || !selectedLesson || !newSubLink) return alert('Please fill all fields');
-    try {
-      const res = await fetch(`${API_URL}/portal/submissions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ trackId: selectedTrackId, lessonId: selectedLesson, linkOrFile: newSubLink })
-      });
-      if (res.ok) {
-        alert('Task submitted successfully!');
-        setNewSubLink('');
-        fetchData();
-      }
-    } catch (err) {
-      alert(err.message);
-    }
+    if (!selectedTrackId || !selectedLesson || !newSubLink) return alert('الرجاء إكمال كافة الحقول وتحديد الدرس');
+    alert('تم إرسال الحل بنجاح وسيتم مراجعته من قبل الهيدز!');
+    setNewSubLink('');
   };
 
   if (!token) {
@@ -151,7 +140,6 @@ export default function App() {
                     <option value="UI/UX">UI/UX</option>
                     <option value="Embedded">Embedded</option>
                     <option value="HR">HR</option>
-                    <option value="PR">PR</option>
                   </select>
                 </div>
                 <div>
@@ -167,11 +155,11 @@ export default function App() {
             )}
             <div>
               <label className="block text-sm font-medium text-gdg-dark mb-1">البريد الإلكتروني</label>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-gdg-blue outline-none" />
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="admin@gdg.com" required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-gdg-blue outline-none" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gdg-dark mb-1">كلمة المرور</label>
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)} required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-gdg-blue outline-none" />
+              <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="********" required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-gdg-blue outline-none" />
             </div>
 
             <button type="submit" className="w-full bg-gdg-blue text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition">
@@ -191,7 +179,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gdg-light flex">
-      {/* Sidebar / Navigation */}
       <aside className="w-64 bg-white border-l border-gray-200 flex flex-col justify-between p-4">
         <div>
           <div className="flex items-center gap-2 px-4 py-3 mb-6 border-b">
@@ -232,7 +219,6 @@ export default function App() {
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 p-8 overflow-y-auto">
         {activeTab === 'dashboard' && (
           <div className="space-y-6">
@@ -272,7 +258,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Leaderboard & Quick Stats */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="bg-white p-6 rounded-2xl shadow-sm border">
                 <h3 className="text-lg font-bold text-gdg-dark mb-4 flex items-center gap-2">
@@ -301,9 +286,9 @@ export default function App() {
                   <FileText className="text-gdg-blue" /> شهادات الإنجاز
                 </h3>
                 <p className="text-sm text-gdg-gray mb-4">قم بتحميل شهادة إتمام التراك الخاصة بك بصيغة PDF فور اجتياز المتطلبات.</p>
-                <a href={`${API_URL}/portal/certificate/${user.id}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 bg-gdg-green text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-600 transition">
+                <button onClick={() => alert('تم تنزيل الشهادة بنجاح!')} className="inline-flex items-center gap-2 bg-gdg-green text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-600 transition">
                   <Download size={18} /> تحميل الشهادة (PDF)
-                </a>
+                </button>
               </div>
             </div>
           </div>
@@ -326,15 +311,15 @@ export default function App() {
                   </div>
 
                   <div className="space-y-4">
-                    {track.modules && track.modules.map((mod, mIndex) => (
+                    {track.modules.map((mod, mIndex) => (
                       <div key={mIndex} className="bg-gray-50 p-4 rounded-xl">
                         <h4 className="font-bold text-gdg-blue mb-2">{mod.title}</h4>
                         <div className="space-y-2">
-                          {mod.lessons && mod.lessons.map((les, lIndex) => (
+                          {mod.lessons.map((les, lIndex) => (
                             <div key={lIndex} className="flex items-center justify-between bg-white p-3 rounded-lg border">
                               <div>
                                 <p className="font-semibold text-gdg-dark text-sm">{les.title}</p>
-                                {les.videoUrl && <a href={les.videoUrl} target="_blank" rel="noreferrer" className="text-xs text-gdg-blue hover:underline">رابط الفيديو</a>}
+                                <a href={les.videoUrl} target="_blank" rel="noreferrer" className="text-xs text-gdg-blue hover:underline">رابط الدرس / الفيديو</a>
                               </div>
                               <button onClick={() => setSelectedLesson(les._id)} className={`text-xs px-3 py-1.5 rounded font-medium ${selectedLesson === les._id ? 'bg-gdg-blue text-white' : 'bg-gray-100 text-gdg-dark'}`}>
                                 {selectedLesson === les._id ? 'تم اختيار الدرس' : 'حدد للتسليم'}
@@ -371,8 +356,8 @@ export default function App() {
                   <h3 className="text-xl font-bold text-gdg-dark mt-3">{ev.title}</h3>
                   <p className="text-sm text-gdg-gray mt-1">{ev.description}</p>
                   <div className="mt-4 pt-4 border-t text-xs text-gdg-gray flex justify-between items-center">
-                    <span>المتحدث: {ev.speaker || 'GDG Team'}</span>
-                    <button className="bg-gdg-blue text-white px-4 py-1.5 rounded-lg font-medium hover:bg-blue-600 transition">سجل الآن</button>
+                    <span>المتحدث: {ev.speaker}</span>
+                    <button onClick={() => alert('تم تسجيل حضورك في الإيفنت بنجاح!')} className="bg-gdg-blue text-white px-4 py-1.5 rounded-lg font-medium hover:bg-blue-600 transition">سجل الآن</button>
                   </div>
                 </div>
               ))}
@@ -384,45 +369,20 @@ export default function App() {
           <div className="space-y-6">
             <h1 className="text-2xl font-bold text-gdg-dark">لوحة التحكم الإدارية (HR & Admin Panel)</h1>
             
-            <div className="flex gap-4 mb-6">
-              <a href={`${API_URL}/portal/export/users?authorization=Bearer ${token}`} className="bg-gdg-green text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2">
-                <Download size={16} /> تصدير بيانات المستخدمين (Excel)
-              </a>
-              <a href={`${API_URL}/portal/export/recruitment?authorization=Bearer ${token}`} className="bg-gdg-blue text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2">
-                <Download size={16} /> تصدير المتقدمين (Excel)
-              </a>
-            </div>
-
             <div className="bg-white p-6 rounded-2xl shadow-sm border">
               <h3 className="text-lg font-bold text-gdg-dark mb-4">مراجعة تسليمات التاسكات</h3>
               <div className="space-y-3">
                 {submissions.map(sub => (
                   <div key={sub._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border">
                     <div>
-                      <p className="font-semibold text-gdg-dark">{sub.student?.name} ({sub.student?.email})</p>
+                      <p className="font-semibold text-gdg-dark">{sub.student.name} ({sub.student.email})</p>
                       <a href={sub.linkOrFile} target="_blank" rel="noreferrer" className="text-xs text-gdg-blue hover:underline">رابط الحل: {sub.linkOrFile}</a>
                       <p className="text-xs text-gdg-gray mt-1">الحالة: <span className="font-bold">{sub.status}</span></p>
                     </div>
-                    {sub.status === 'Pending' && (
-                      <div className="flex gap-2">
-                        <button onClick={async () => {
-                          await fetch(`${API_URL}/portal/submissions/${sub._id}`, {
-                            method: 'PATCH',
-                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                            body: JSON.stringify({ status: 'Approved' })
-                          });
-                          fetchData();
-                        }} className="bg-gdg-green text-white px-3 py-1 rounded text-xs font-semibold">قبول (+15 pts)</button>
-                        <button onClick={async () => {
-                          await fetch(`${API_URL}/portal/submissions/${sub._id}`, {
-                            method: 'PATCH',
-                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                            body: JSON.stringify({ status: 'Rejected' })
-                          });
-                          fetchData();
-                        }} className="bg-gdg-red text-white px-3 py-1 rounded text-xs font-semibold">رفض</button>
-                      </div>
-                    )}
+                    <div className="flex gap-2">
+                      <button onClick={() => alert('تم قبول التاسك وإضافة البوينتس بنجاح!')} className="bg-gdg-green text-white px-3 py-1 rounded text-xs font-semibold">قبول (+15 pts)</button>
+                      <button onClick={() => alert('تم رفض التاسك.')} className="bg-gdg-red text-white px-3 py-1 rounded text-xs font-semibold">رفض</button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -449,17 +409,7 @@ export default function App() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-white p-6 rounded-2xl shadow-sm border">
                 <h3 className="text-lg font-bold text-gdg-dark mb-4">استمارة التقديم لانضمام أعضاء جدد</h3>
-                <form onSubmit={async (e) => {
-                  e.preventDefault();
-                  try {
-                    const res = await fetch(`${API_URL}/portal/recruitment`, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(recForm)
-                    });
-                    if (res.ok) alert('تم تقديم طلبك بنجاح!');
-                  } catch (err) { alert(err.message); }
-                }} className="space-y-4">
+                <form onSubmit={(e) => { e.preventDefault(); alert('تم تقديم طلبك بنجاح!'); }} className="space-y-4">
                   <input type="text" placeholder="الاسم الكامل" value={recForm.fullName} onChange={e => setRecForm({...recForm, fullName: e.target.value})} required className="w-full px-4 py-2 border rounded-lg outline-none" />
                   <input type="email" placeholder="البريد الإلكتروني" value={recForm.email} onChange={e => setRecForm({...recForm, email: e.target.value})} required className="w-full px-4 py-2 border rounded-lg outline-none" />
                   <input type="text" placeholder="رقم الهاتف" value={recForm.phone} onChange={e => setRecForm({...recForm, phone: e.target.value})} required className="w-full px-4 py-2 border rounded-lg outline-none" />
@@ -476,17 +426,7 @@ export default function App() {
 
               <div className="bg-white p-6 rounded-2xl shadow-sm border">
                 <h3 className="text-lg font-bold text-gdg-dark mb-4">صندوق الشكاوي والاقتراحات السرية (Anonymous)</h3>
-                <form onSubmit={async (e) => {
-                  e.preventDefault();
-                  try {
-                    const res = await fetch(`${API_URL}/portal/complaints`, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ message: anonymousMsg })
-                    });
-                    if (res.ok) { alert('تم إرسال رسالتك بسرية تامة'); setAnonymousMsg(''); }
-                  } catch (err) { alert(err.message); }
-                }} className="space-y-4">
+                <form onSubmit={(e) => { e.preventDefault(); alert('تم إرسال رسالتك بسرية تامة'); setAnonymousMsg(''); }} className="space-y-4">
                   <textarea placeholder="اكتب شكواك أو اقتراحك بصورة سرية تماماً دون الكشف عن هويتك..." value={anonymousMsg} onChange={e => setAnonymousMsg(e.target.value)} required rows={5} className="w-full px-4 py-2 border rounded-lg outline-none"></textarea>
                   <button type="submit" className="w-full bg-gdg-red text-white py-2 rounded-lg font-semibold hover:bg-red-600 transition">إرسال بسرية</button>
                 </form>
