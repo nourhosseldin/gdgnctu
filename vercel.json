@@ -1,5 +1,5 @@
 {
-  "version": 2,
-  "outputDirectory": "dist",
-  "cleanUrls": true
+  "installCommand": "cd client && npm install",
+  "buildCommand": "cd client && npm run build",
+  "outputDirectory": "client/dist"
 }
