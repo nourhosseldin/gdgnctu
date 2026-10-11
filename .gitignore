@@ -1,1 +1,16 @@
+# Dependencies
 node_modules/
+client/node_modules/
+
+# Build outputs
+client/dist/
+
+# SQLite Database local files
+server/database.sqlite
+*.sqlite
+*.sqlite-journal
+
+# Environment and logs
+.env
+.DS_Store
+*.log
