@@ -1,7 +1,5 @@
 {
   "version": 2,
   "outputDirectory": "dist",
-  "routes": [
-    { "src": "/(.*)", "dest": "/dist/$1" }
-  ]
+  "cleanUrls": true
 }
